@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>My Furry Friend is Art - Realidad Aumentada</title>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    .instructions {
+      position: fixed; top: 0; left: 0; right: 0;
+      background: rgba(0,0,0,0.75); color: white; text-align: center;
+      padding: 12px; font-family: sans-serif; font-size: 15px; z-index: 999;
+    }
+    .cert-btn {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: #c9a24b; color: #1a1a1a; border: none;
+      padding: 12px 22px; border-radius: 30px; font-family: sans-serif;
+      font-size: 15px; font-weight: bold; z-index: 999; box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+    .cert-panel {
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #fdfaf3; color: #1a1a1a;
+      font-family: 'Georgia', serif; padding: 24px 20px 30px;
+      border-radius: 20px 20px 0 0; z-index: 1000;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+      max-height: 75vh; overflow-y: auto;
+    }
+    .cert-panel h2 { margin: 0 0 2px; font-size: 20px; letter-spacing: 1px; }
+    .cert-panel .sub { font-size: 12px; color: #7a6a4a; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
+    .cert-panel table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+    .cert-panel td { padding: 7px 0; border-bottom: 1px solid #e6dfc9; vertical-align: top; }
+    .cert-panel td:first-child { color: #7a6a4a; width: 38%; }
+    .cert-panel .autenticado {
+      margin-top: 14px; font-size: 13px; color: #7a6a4a; font-style: italic;
+    }
+    .cert-panel .contacto {
+      margin-top: 16px; padding-top: 14px; border-top: 1px solid #e6dfc9;
+      font-size: 13.5px; line-height: 1.7;
+    }
+    .cert-panel .contacto a { color: #a5813a; text-decoration: none; }
+    .cert-panel .firma { margin-top: 16px; text-align: right; font-style: italic; font-size: 17px; }
+    .cert-close { position: absolute; top: 14px; right: 18px; background: none; border: none; font-size: 20px; color: #7a6a4a; }
+  </style>
+</head>
+<body>
+  <div class="instructions">🐾 Toca la pantalla (con sonido), luego apunta tu cámara al cuadro</div>
+
+  <a-scene
+    mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: yes; filterMinCF: 0.0001; filterBeta: 0.001;"
+    color-space="sRGB"
+    renderer="colorManagement: true, physicallyCorrectLights"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: true"
+  >
+    <a-assets timeout="8000">
+      <video id="dogVideo" src="./video.mp4" preload="auto" loop="true" playsinline webkit-playsinline></video>
+    </a-assets>
+
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+    <a-entity mindar-image-target="targetIndex: 0">
+      <a-video src="#dogVideo" width="1" height="1.333" position="0 0 0" rotation="0 0 0"></a-video>
+    </a-entity>
+  </a-scene>
+
+  <button class="cert-btn" onclick="document.getElementById('certPanel').style.display='block'">📜 Ver certificado</button>
+
+  <div class="cert-panel" id="certPanel">
+    <button class="cert-close" onclick="document.getElementById('certPanel').style.display='none'">✕</button>
+    <h2>Terrier Escocés</h2>
+    <div class="sub">Certificado digital · N° CHD-2026-002</div>
+    <table>
+      <tr><td>Técnica</td><td>Carboncillo, detalles óleo pastel sobre papel de algodón + video de Realidad Aumentada</td></tr>
+      <tr><td>Tamaño</td><td>A4</td></tr>
+      <tr><td>Estilo</td><td>Obra realista</td></tr>
+      <tr><td>Artista</td><td>Char Daniel Delgado</td></tr>
+      <tr><td>Fecha</td><td>Agosto 2026</td></tr>
+      <tr><td>Edición</td><td>Obra original con 2 copias intervenidas artísticamente</td></tr>
+    </table>
+    <div class="autenticado">Autenticada personalmente por el artista.</div>
+    <div class="contacto">
+      Instagram: <a href="https://instagram.com/char_danieldelgado_art" target="_blank">@char_danieldelgado_art</a><br>
+      Email: <a href="mailto:chardanieldelgado@gmail.com">chardanieldelgado@gmail.com</a><br>
+      WhatsApp: <a href="https://wa.me/525581859962" target="_blank">55 8185 9962</a>
+    </div>
+    <div class="firma">— CHDB</div>
+  </div>
+
+  <script>
+    const sceneEl = document.querySelector('a-scene');
+    const video = document.querySelector('#dogVideo');
+
+    function unlockVideo() {
+      video.play().then(() => {
+        video.pause();
+        video.currentTime = 0;
+      }).catch(() => {});
+      document.removeEventListener('touchstart', unlockVideo);
+      document.removeEventListener('click', unlockVideo);
+    }
+    document.addEventListener('touchstart', unlockVideo, { once: true });
+    document.addEventListener('click', unlockVideo, { once: true });
+
+    sceneEl.addEventListener('targetFound', () => { video.play(); });
+    sceneEl.addEventListener('targetLost', () => { video.pause(); });
+  </script>
+</body>
+</html>
